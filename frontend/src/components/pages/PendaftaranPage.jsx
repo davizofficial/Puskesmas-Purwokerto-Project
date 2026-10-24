@@ -1,17 +1,9 @@
 import PatientForm from "../PatientForm";
-import PatientList from "../PatientList";
 
-export default function PendaftaranPage({
-  patients,
-  onAddPatient,
-  onDeletePatient,
-  onUpdateStatus,
-  onResetSampleData,
-  onClearAll,
-}) {
+export default function PendaftaranPage({ onAddPatient, onNavigate }) {
   return (
     <div>
-      {/* Page Header */}
+      {/* Page Header (Persis seperti legacy-html/pendaftaran.html) */}
       <section className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-5xl font-bold mb-4">Pendaftaran Pasien</h1>
@@ -23,17 +15,7 @@ export default function PendaftaranPage({
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-16">
-        {/* Formulir Pendaftaran */}
-        <PatientForm onAddPatient={onAddPatient} />
-
-        {/* Daftar Antrean Pasien Real-Time */}
-        <PatientList
-          patients={patients}
-          onDeletePatient={onDeletePatient}
-          onUpdateStatus={onUpdateStatus}
-          onResetSampleData={onResetSampleData}
-          onClearAll={onClearAll}
-        />
+        <PatientForm onAddPatient={onAddPatient} onNavigate={onNavigate} />
       </div>
     </div>
   );
