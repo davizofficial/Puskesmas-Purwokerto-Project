@@ -2,17 +2,22 @@ import { useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 
-// Page Views (99.99% Identik dengan legacy-html)
+// Halaman-halaman Publik (99.99% Identik dengan legacy-html)
 import HomePage from "./components/pages/HomePage";
 import LayananPage from "./components/pages/LayananPage";
 import DokterPage from "./components/pages/DokterPage";
 import PendaftaranPage from "./components/pages/PendaftaranPage";
+import AntreanPage from "./components/pages/AntreanPage";
 import KontakPage from "./components/pages/KontakPage";
 import GaleriPage from "./components/pages/GaleriPage";
 import TentangKamiPage from "./components/pages/TentangKamiPage";
 import MemberPage from "./components/pages/MemberPage";
 
-// Data awal realistis untuk entitas Pasien (Bukan placeholder generik "Lorem ipsum")
+// Halaman Petugas Medis / Autentikasi
+import LoginPage from "./components/pages/LoginPage";
+import PetugasDashboard from "./components/pages/PetugasDashboard";
+
+// Data awal realistis untuk entitas Pasien (Topik Puskesmas / Kesehatan)
 const INITIAL_PATIENTS = [
   {
     id: "PS-1042",
@@ -35,7 +40,7 @@ const INITIAL_PATIENTS = [
     alamat: "Jln. Gatot Subroto No. 45, Purwokerto",
     jenisKelamin: "Perempuan",
     tanggalLahir: "1995-12-05",
-    poli: "Poli Gigi",
+    poli: "Gigi & Mulut",
     keluhan: "Gigi geraham belakang berlubang dan nyeri saat makan",
     waktuDaftar: "08:30 WIB",
     status: "Menunggu",
@@ -48,7 +53,7 @@ const INITIAL_PATIENTS = [
     alamat: "Jln. HR Bunyamin No. 88, Purwokerto",
     jenisKelamin: "Laki-laki",
     tanggalLahir: "2018-03-20",
-    poli: "Poli Anak",
+    poli: "Imunisasi",
     keluhan: "Pemeriksaan imunisasi rutin & pemantauan gizi balita",
     waktuDaftar: "08:45 WIB",
     status: "Menunggu",
@@ -61,8 +66,8 @@ const INITIAL_PATIENTS = [
     alamat: "Jln. Dr. Angka No. 34, Purwokerto",
     jenisKelamin: "Perempuan",
     tanggalLahir: "1990-07-14",
-    poli: "Poli KIA",
-    keluhan: "Kontrol kehamilan berkala trimester ke-2",
+    poli: "Pemeriksaan Umum",
+    keluhan: "Kontrol tensi darah dan keluhan migrain berkala",
     waktuDaftar: "07:55 WIB",
     status: "Selesai",
   },
@@ -70,6 +75,7 @@ const INITIAL_PATIENTS = [
 
 export default function App() {
   const [activePage, setActivePage] = useState("beranda");
+  const [isStaffLoggedIn, setIsStaffLoggedIn] = useState(false);
 
   // 5.a. Simpan daftar item sebagai state (array) di App.jsx
   const [patients, setPatients] = useState(INITIAL_PATIENTS);
@@ -84,7 +90,7 @@ export default function App() {
     setPatients((prev) => prev.filter((p) => p.id !== patientId));
   };
 
-  // Handler update status pasien
+  // Handler update status pasien (Panggil / Selesai)
   const handleUpdateStatus = (patientId, newStatus) => {
     setPatients((prev) =>
       prev.map((p) => (p.id === patientId ? { ...p, status: newStatus } : p))
@@ -101,34 +107,70 @@ export default function App() {
     setPatients(INITIAL_PATIENTS);
   };
 
+  // Handler Login & Logout Petugas
+  const handleLogin = () => {
+    setIsStaffLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    setIsStaffLoggedIn(false);
+    setActivePage("beranda");
+  };
+
   return (
     <div className="bg-gray-50 font-sans min-h-screen flex flex-col justify-between text-gray-800">
-      {/* 1. Header (Persis seperti legacy-html) */}
+      {/* 1. Header Global (Navigasi Bersih 100% Identik) */}
       <Header activePage={activePage} onNavigate={setActivePage} />
 
-      {/* 2. Main Content sesuai halaman aktif (99.99% identik dengan legacy-html) */}
+      {/* 2. Main Content sesuai halaman aktif */}
       <main className="flex-1">
         {activePage === "beranda" && <HomePage onNavigate={setActivePage} />}
         {activePage === "layanan" && <LayananPage />}
         {activePage === "dokter" && <DokterPage />}
         {activePage === "pendaftaran" && (
           <PendaftaranPage
-            patients={patients}
             onAddPatient={handleAddPatient}
-            onDeletePatient={handleDeletePatient}
-            onUpdateStatus={handleUpdateStatus}
-            onResetSampleData={handleResetSampleData}
-            onClearAll={handleClearAll}
+            onNavigate={setActivePage}
           />
+        )}
+        {activePage === "antrean" && (
+          <AntreanPage patients={patients} onNavigate={setActivePage} />
         )}
         {activePage === "kontak" && <KontakPage />}
         {activePage === "galeri" && <GaleriPage />}
         {activePage === "tentang-kami" && <TentangKamiPage />}
         {activePage === "member" && <MemberPage />}
+        {activePage === "login" && (
+          <LoginPage
+            isStaffLoggedIn={isStaffLoggedIn}
+            onLogin={handleLogin}
+            onLogout={handleLogout}
+            onNavigate={setActivePage}
+          />
+        )}
+        {activePage === "petugas-dashboard" &&
+          (isStaffLoggedIn ? (
+            <PetugasDashboard
+              patients={patients}
+              onDeletePatient={handleDeletePatient}
+              onUpdateStatus={handleUpdateStatus}
+              onResetSampleData={handleResetSampleData}
+              onClearAll={handleClearAll}
+              onLogout={handleLogout}
+              onNavigate={setActivePage}
+            />
+          ) : (
+            <LoginPage
+              isStaffLoggedIn={isStaffLoggedIn}
+              onLogin={handleLogin}
+              onLogout={handleLogout}
+              onNavigate={setActivePage}
+            />
+          ))}
       </main>
 
-      {/* 3. Footer (Persis seperti legacy-html) */}
-      <Footer />
+      {/* 3. Footer Global */}
+      <Footer onNavigate={setActivePage} />
     </div>
   );
 }
