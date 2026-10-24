@@ -1,41 +1,32 @@
-export default function PatientCard({ patient, onDelete, onUpdateStatus }) {
-  const getStatusBadge = (status) => {
+export default function PatientCard({
+  patient,
+  isStaff = false,
+  onDelete,
+  onUpdateStatus,
+}) {
+  const getStatusStyle = (status) => {
     switch (status) {
-      case "Menunggu":
-        return "bg-amber-100 text-amber-800 border-amber-300";
       case "Sedang Diperiksa":
-        return "bg-blue-100 text-blue-800 border-blue-300";
+        return "bg-emerald-600 text-white";
+      case "Menunggu":
+        return "bg-amber-100 text-amber-800 border border-amber-300";
       case "Selesai":
-        return "bg-emerald-100 text-emerald-800 border-emerald-300";
+        return "bg-gray-100 text-gray-700 border border-gray-300";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
-    }
-  };
-
-  const getPoliIcon = (poli) => {
-    switch (poli) {
-      case "Poli Gigi":
-        return "fa-tooth";
-      case "Poli Anak":
-        return "fa-baby";
-      case "Poli KIA":
-        return "fa-person-breastfeeding";
-      case "Laboratorium":
-        return "fa-flask-vial";
-      default:
-        return "fa-stethoscope";
+        return "bg-gray-100 text-gray-700";
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg hover:-translate-y-1 transition duration-200 border-t-4 border-emerald-600 flex flex-col justify-between">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col justify-between hover:border-emerald-500 transition">
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <span className="font-bold text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded border border-emerald-200">
+        {/* Nomor Tiket & Status */}
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-2xl font-bold font-mono text-emerald-800">
             {patient.id}
           </span>
           <span
-            className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${getStatusBadge(
+            className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusStyle(
               patient.status
             )}`}
           >
@@ -43,68 +34,72 @@ export default function PatientCard({ patient, onDelete, onUpdateStatus }) {
           </span>
         </div>
 
-        <h3 className="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
-          <i className="fas fa-user-circle text-emerald-600 text-lg"></i>
-          <span>{patient.nama}</span>
+        {/* Nama Pasien */}
+        <h3 className="text-lg font-bold text-gray-900 mb-2">
+          {patient.nama}
         </h3>
-        <p className="text-xs text-gray-500 mb-4 font-mono">
-          NIK: {patient.nik}
-        </p>
 
-        <div className="space-y-2 text-sm text-gray-700 bg-gray-50 p-4 rounded-lg mb-4">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-500 font-medium">Layanan / Poli:</span>
-            <span className="font-bold text-emerald-700 flex items-center gap-1.5">
-              <i className={`fas ${getPoliIcon(patient.poli)}`}></i>
-              {patient.poli}
-            </span>
+        {/* Info Tambahan untuk Staf Medis (Privat) */}
+        {isStaff && (
+          <div className="mb-3 text-xs text-gray-600 font-mono bg-gray-50 p-2 rounded border border-gray-200">
+            <div>NIK: {patient.nik}</div>
+            {patient.telepon && <div>Telp: {patient.telepon}</div>}
           </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-500 font-medium">Jenis Kelamin:</span>
-            <span>{patient.jenisKelamin}</span>
+        )}
+
+        {/* Info Layanan & Waktu */}
+        <div className="text-sm text-gray-600 space-y-1 mb-4">
+          <div className="flex justify-between">
+            <span className="text-gray-500">Layanan:</span>
+            <span className="font-semibold text-gray-800">{patient.poli}</span>
           </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-500 font-medium">Waktu Daftar:</span>
+          <div className="flex justify-between">
+            <span className="text-gray-500">Waktu Masuk:</span>
             <span>{patient.waktuDaftar}</span>
           </div>
-          <div className="pt-2 border-t border-gray-200 text-xs">
-            <span className="text-gray-500 block mb-0.5">Keluhan Awal:</span>
-            <p className="italic text-gray-800 line-clamp-2">"{patient.keluhan}"</p>
+        </div>
+
+        {/* Keluhan hanya untuk Petugas Medis */}
+        {isStaff && patient.keluhan && (
+          <div className="text-xs bg-gray-50 p-2.5 rounded border border-gray-200 mb-4 text-gray-700">
+            <span className="font-semibold text-gray-600 block mb-0.5">
+              Keluhan:
+            </span>
+            <p className="italic">"{patient.keluhan}"</p>
           </div>
-        </div>
+        )}
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-gray-100 text-xs">
-        <div className="flex gap-2">
-          {patient.status === "Menunggu" && (
-            <button
-              onClick={() => onUpdateStatus(patient.id, "Sedang Diperiksa")}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded transition cursor-pointer flex items-center gap-1"
-            >
-              <i className="fas fa-stethoscope"></i>
-              <span>Panggil</span>
-            </button>
-          )}
-          {patient.status === "Sedang Diperiksa" && (
-            <button
-              onClick={() => onUpdateStatus(patient.id, "Selesai")}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-3 py-1.5 rounded transition cursor-pointer flex items-center gap-1"
-            >
-              <i className="fas fa-check"></i>
-              <span>Selesai</span>
-            </button>
-          )}
-        </div>
+      {/* Aksi Petugas */}
+      {isStaff && (
+        <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
+          <div className="flex gap-2">
+            {patient.status === "Menunggu" && (
+              <button
+                onClick={() => onUpdateStatus(patient.id, "Sedang Diperiksa")}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-3 py-1.5 rounded transition cursor-pointer"
+              >
+                Panggil
+              </button>
+            )}
+            {patient.status === "Sedang Diperiksa" && (
+              <button
+                onClick={() => onUpdateStatus(patient.id, "Selesai")}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded transition cursor-pointer"
+              >
+                Selesai
+              </button>
+            )}
+          </div>
 
-        <button
-          onClick={() => onDelete(patient.id)}
-          className="text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1.5 rounded transition cursor-pointer flex items-center gap-1"
-          title="Hapus data pasien"
-        >
-          <i className="fas fa-trash-can"></i>
-          <span>Hapus</span>
-        </button>
-      </div>
+          <button
+            onClick={() => onDelete(patient.id)}
+            className="text-red-600 hover:text-red-800 text-xs py-1 px-2 cursor-pointer"
+          >
+            Hapus
+          </button>
+        </div>
+      )}
     </div>
   );
 }
